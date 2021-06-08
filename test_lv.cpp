@@ -100,7 +100,7 @@ struct value
             return false;
         if(v < right.v)
             return true;
-            return false;
+        return false;
     }
     int m;
     int v;
@@ -169,8 +169,9 @@ void test_compare(time_t seconds)
     }
 
     time_t start = time(0);
-    while(time(0) - start < 1);
-        start++;
+    while(time(0) - start < 1) {
+    }
+    start++;
 
     while(time(0) - start < seconds)
     {
@@ -315,8 +316,9 @@ void test_splice(time_t seconds)
     }
 
     time_t start = time(0);
-    while(time(0) - start < 1);
-        start++;
+    while(time(0) - start < 1) {
+    }
+    start++;
 
     while(time(0) - start < seconds)
     {

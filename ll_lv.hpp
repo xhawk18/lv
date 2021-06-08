@@ -1,25 +1,26 @@
 /*
-*
-* Copyright (c) 2012, xhawk18
-* at gmail.com
-*
-* Permission to use, copy, modify, distribute and sell this software
-* and its documentation for any purpose that fits the following requirement
-* is hereby granted without fee, provided that the above copyright notice
-* appear in all copies and that both that copyright notice and this permission
-* notice appear in supporting documentation.  X-Hawk representations about the
-* suitability of this software for any purpose.
-* It is provided "as is" without express or implied warranty.
-*
-* Special requirement 1, to use this software in commercial software, 
-* you should claim the usage of this software in striking poistion on 
-* the web page about your software.
-*
-* Special requirement 2, the license of this software is truely free for ever
-* and must not be converted to a GPL like license.
+ *
+ * Copyright (c) 2012, xhawk18
+ * at gmail.com
+ *
+ * Permission to use, copy, modify, distribute and sell this software
+ * and its documentation for any purpose that fits the following requirement
+ * is hereby granted without fee, provided that the above copyright notice
+ * appear in all copies and that both that copyright notice and this permission
+ * notice appear in supporting documentation.  X-Hawk representations about the
+ * suitability of this software for any purpose.
+ * It is provided "as is" without express or implied warranty.
+ *
+ * Special requirement 1, to use this software in commercial software, 
+ * you should claim the usage of this software in striking poistion on 
+ * the web page about your software.
+ *
+ * Special requirement 2, the license of this software is truely free for ever
+ * and must not be converted to a GPL like license.
+ */
 
-
-/* ll::lv is a container that has O(log(n)) erase/insert time and random access time,
+/*
+ * ll::lv is a container that has O(log(n)) erase/insert time and random access time,
  * It can replace list/vector/deque in some case.
  */
 #ifndef INC_LL_LV_HPP_
@@ -418,7 +419,7 @@ public:
             }
             else
             {
-                difference_type right_size = __x->_M_right ? __x->_M_right->_M_size : 0;  
+                right_size = __x->_M_right ? __x->_M_right->_M_size : 0;  
                 left += __x->_M_size - right_size;
 
                 __x = __x->_M_right;
@@ -677,7 +678,7 @@ public:
             }
             else
             {
-                difference_type right_size = __x->_M_right ? __x->_M_right->_M_size : 0;  
+                right_size = __x->_M_right ? __x->_M_right->_M_size : 0;  
                 left += __x->_M_size - right_size;
                 __x = __x->_M_right;    
             }
@@ -748,7 +749,7 @@ public:
     { }
 
     explicit lv(const allocator_type& __a)
-        : _Rep_type(__a)
+        : _Rep_type(lv_key_compare<_Val>(), __a)
     { }
 
     explicit lv(size_type __count)
@@ -762,7 +763,7 @@ public:
     }
 
     lv(size_type __count, const value_type &__val, const allocator_type& __a)
-    : _Rep_type(__a)
+    : _Rep_type(lv_key_compare<_Val>(), __a)
     {
         insert(begin(), __count, __val);
     }
@@ -934,6 +935,12 @@ public:
     void
     swap(lv<_Val, _SizeOfValue, _Alloc>& __t);
 
+    lv<_Val, _SizeOfValue, _Alloc>&
+    operator=(const lv<_Val, _SizeOfValue, _Alloc>& __t) {
+        lv<_Val, _SizeOfValue, _Alloc>(__t).swap(*this);
+        return *this;
+    }
+
     // Insert/erase.
     iterator
     insert(iterator __position, const value_type& __x);
@@ -1060,7 +1067,7 @@ public:
     equal_range(const value_type& __v)
     {
         std::pair<typename _Rep_type::iterator, typename _Rep_type::iterator>
-            its = equal_range(__v);
+            its = _Rep_type::equal_range(__v);
         return std::pair<iterator, iterator>
             (iterator(its.first), iterator(its.second));
     }
@@ -1069,7 +1076,7 @@ public:
     equal_range(const value_type& __v) const
     {
         std::pair<typename _Rep_type::const_iterator, typename _Rep_type::const_iterator>
-            its = equal_range(__v);
+            its = _Rep_type::equal_range(__v);
         return std::pair<const_iterator, const_iterator>
             (const_iterator(its.first), const_iterator(its.second));
     }
@@ -1370,7 +1377,7 @@ public:
     }
     void adjust_node_size(const_iterator &itr, size_t add_size, size_t sub_size)
     {
-        _Base_type::_Rb_tree_adjust_node_size(itr._M_itr._M_node, this->_M_impl._M_header, add_size, sub_size);
+        _Base_type::_Rb_tree_adjust_node_size(const_cast<typename _Rep_type::_Base_ptr>(itr._M_itr._M_node), this->_M_impl._M_header, add_size, sub_size);
     }
 
     // Debugging.
@@ -1381,8 +1388,8 @@ public:
         for (const_iterator __it = begin(); __it != end(); ++__it, ++i)
         {
             _Const_Link_type __x = static_cast<_Const_Link_type>(__it._M_itr._M_node);
-            _Const_Link_type __L = _S_left(__x);
-            _Const_Link_type __R = _S_right(__x);
+            _Const_Link_type __L = _Rep_type::_S_left(__x);
+            _Const_Link_type __R = _Rep_type::_S_right(__x);
 
             if (__it._M_get_header() != &this->_M_impl._M_header)
                 return false;
